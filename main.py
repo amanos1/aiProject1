@@ -33,59 +33,59 @@ class point:
 
 fringe = []
 closed = set()
-def H(g, p):
+def H(g, p):#takes 2 tuples
     xdiff = math.fabs(p[0] - g[0])
     ydiff = math.fabs(p[1] - g[1])
     dist = math.sqrt(2)*min(xdiff, ydiff) + max(xdiff, ydiff) - min(xdiff, ydiff)
     return dist
-def succ(verts, p):
+def succ(verts, p, gx, gy):
     s = set()
-    i = (p.x-1)+5*(p.y-1)
+    i = (p.x-1)+gx*(p.y-1)
     if p.x>1:
         if not verts[i-1].b:
             s.add(verts[i-1])
         l = True
     else:
         l = False
-    if p.x<5:
+    if p.x<gx:
         if not verts[i].b:
             s.add(verts[i+1])
         r = True
     else:
         r = False
     if p.y>1:
-        if not verts[i-5].b:
-            s.add(verts[i-5])
+        if not verts[i-gx].b:
+            s.add(verts[i-gx])
         u = True
     else:
         u = False
-    if p.y<3:
+    if p.y<gy:
         if not verts[i].b:
-            s.add(verts[i+5])
+            s.add(verts[i+gx])
         d = True
     else:
         d = False
 
     if u and l:
-        if not verts[i-6].b:
-            s.add(verts[i-6])#up left
-            s.add(verts[i-5])#up
+        if not verts[i-(gx+1)].b:
+            s.add(verts[i-(gx+1)])#up left
+            s.add(verts[i-gx])#up
             s.add(verts[i-1])#left
     if l and d:
         if not verts[i-1].b:
-            s.add(verts[i+4])#down left
+            s.add(verts[i+(gx-1)])#down left
             s.add(verts[i-1])#left
-            s.add(verts[i+5])#down
+            s.add(verts[i+gx])#down
     if u and r:
         if not verts[i-5].b:
-            s.add(verts[i-4])#up right
-            s.add(verts[i-5])#up
+            s.add(verts[i-(gx-1)])#up right
+            s.add(verts[i-gx])#up
             s.add(verts[i+1])#right
     if d and r:
         if not verts[i].b:
             s.add(verts[i+1])#right
-            s.add(verts[i+6])#down right
-            s.add(verts[i+5])#down
+            s.add(verts[i+(gx+1)])#down right
+            s.add(verts[i+gx])#down
     return s
 def Astar(verts,goal,start):
     g = goal
