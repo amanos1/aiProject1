@@ -5,6 +5,8 @@
 import heapq
 import math
 from typing import List, Any
+columns = 5
+rows = 3
 class point:
     def __init__(self, x, y, b, g, h, p):
         self.x = x
@@ -98,7 +100,7 @@ def Astar(verts,goal,start):
         if s.x == g.x and s.y == g.y:
             return "path found"
         closed.add(s)
-        for sstar in succ(verts,s):
+        for sstar in succ(verts,s,columns,rows):
             if sstar not in closed:
                 if sstar not in fringe:
                     sstar.setG(float('inf'))
