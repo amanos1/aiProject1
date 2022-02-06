@@ -14,57 +14,70 @@ class Vertex:
 
 def initPath(fileName):
     f = open(fileName, "r")
-    startx = int(f.read(2))
-    starty = int(f.read(2))
-    goalx = int(f.read(2))
-    goaly = int(f.read(2))
-    columns = int(f.read(2))
-    rows = int(f.read(2))
+    file = f.read()
+    fNums = file.split()
+    fIndex = 0
+    startx = int(fNums[fIndex])
+    fIndex += 1
+    starty = int(fNums[fIndex])
+    fIndex += 1
+    goalx = int(fNums[fIndex])
+    fIndex += 1
+    goaly = int(fNums[fIndex])
+    fIndex += 1
+    columns = int(fNums[fIndex])
+    fIndex += 1
+    rows = int(fNums[fIndex])
+    fIndex += 1
     f.close()
-
-    print("columns: ", columns, "rows: ", rows)
 
     # to access a vertex: verticies[columns * x + y]
     for i in range(columns+1):
         for j in range(rows+1):
-            print(columns * i + j)
             singleVertetx = Vertex(i, j)
             verticies.append(singleVertetx)
 
     for i in range(columns+1):
         for j in range(rows+1):
-            # print(columns * i + j)
-            """ verticies[columns * i + j].neighbors = []
+            verticies[rows * i + j].neighbors = []
             if i > 0:
-                verticies[columns * i + j].neighbors.append(verticies[columns * (i - 1) + j])
+                verticies[rows * i + j].neighbors.append(verticies[rows * (i - 1) + j])
                 if j > 0:
-                    verticies[columns * i + j].neighbors.append(verticies[columns * (i - 1) + (j - 1)])
+                    verticies[rows * i + j].neighbors.append(verticies[rows * (i - 1) + (j - 1)])
                 if j < rows:
-                    verticies[columns * i + j].neighbors.append(verticies[columns * (i - 1) + (j + 1)])
+                    verticies[rows * i + j].neighbors.append(verticies[rows * (i - 1) + (j + 1)])
             if i < columns:
-                verticies[columns * i + j].neighbors.append(verticies[columns * (i + 1) + j])
+                verticies[rows * i + j].neighbors.append(verticies[rows * (i + 1) + j])
                 if j > 0:
-                    verticies[columns * i + j].neighbors.append(verticies[columns * (i + 1) + (j - 1)])
+                    verticies[rows * i + j].neighbors.append(verticies[rows * (i + 1) + (j - 1)])
                 if j < rows:
-                    verticies[columns * i + j].neighbors.append(verticies[columns * (i + 1) + (j + 1)])
+                    verticies[rows * i + j].neighbors.append(verticies[rows * (i + 1) + (j + 1)])
             if j > 0:
-                verticies[columns * i + j].neighbors.append(verticies[columns * i + (j - 1)])
+                verticies[rows * i + j].neighbors.append(verticies[rows * i + (j - 1)])
             if j < rows:
-                verticies[columns * i + j].neighbors.append(verticies[columns * i + (j + 1)]) """
+                verticies[rows * i + j].neighbors.append(verticies[rows * i + (j + 1)])
 
-    print(columns*2+2)
-    path = [verticies[columns*1+3], verticies[columns*2+2], verticies[columns*2+1], verticies[columns*1+0]]
+    path = [verticies[rows*1+3], verticies[rows*2+2], verticies[rows*2+1], verticies[rows*1+0]]
     return path
 
 
 def displayPath(fileName, shortestPath):
     f = open(fileName, "r")
-    sx = int(f.read(2))
-    sy = int(f.read(2))
-    gx = int(f.read(2))
-    gy = int(f.read(2))
-    columns = int(f.read(2))
-    rows = int(f.read(2))
+    file = f.read()
+    fNums = file.split()
+    fIndex = 0
+    sx = int(fNums[fIndex])
+    fIndex += 1
+    sy = int(fNums[fIndex])
+    fIndex += 1
+    gx = int(fNums[fIndex])
+    fIndex += 1
+    gy = int(fNums[fIndex])
+    fIndex += 1
+    columns = int(fNums[fIndex])
+    fIndex += 1
+    rows = int(fNums[fIndex])
+    fIndex += 1
 
     def h(v):
         m1 = min(abs(v.x-gx), abs(v.y-gy))
@@ -88,23 +101,26 @@ def displayPath(fileName, shortestPath):
 
 
     for i in range(1, columns + 2):
-        daCanvas.create_line(i*10, 10, i*10, 500, fill="black")
+        daCanvas.create_line(i*10, 10, i*10, 510, fill="black")
 
     for i in range(1, rows + 2):
-        daCanvas.create_line(10, i*10, 1000, i*10, fill="black")
+        daCanvas.create_line(10, i*10, 1010, i*10, fill="black")
 
     for i in range(rows * columns):
-        blockY = int(f.read(2))
-        blockX = int(f.read(2))
-        on = int(f.read(2))
+        blockY = int(fNums[fIndex])
+        fIndex += 1
+        blockX = int(fNums[fIndex])
+        fIndex += 1
+        on = int(fNums[fIndex])
+        fIndex += 1
         if on == 1:
             daCanvas.create_rectangle(blockY*10, blockX*10, (blockY*10)+10, (blockX*10)+10, fill="grey")
 
     f.close()
 
-    daCanvas.create_oval((10*sx)-5, (10*sy)-5, (10*sx)+5, (10*sy)+5, fill="black")
+    daCanvas.create_oval((10*sx)-3, (10*sy)-3, (10*sx)+3, (10*sy)+3, fill="black")
     daCanvas.create_text((10*sx)+20, (10*sy)+15, text="start", fill="black")
-    daCanvas.create_oval((10*gx)-5, (10*gy)-5, (10*gx)+5, (10*gy)+5, fill="black")
+    daCanvas.create_oval((10*gx)-3, (10*gy)-3, (10*gx)+3, (10*gy)+3, fill="black")
     daCanvas.create_text((10*gx)+20, (10*gy)+15, text="goal", fill="black")
 
     for i in range(1, len(shortestPath)):
@@ -122,13 +138,13 @@ def displayPath(fileName, shortestPath):
     def getInfo():
         ix = int(infoX.get())
         iy = int(infoY.get())
-        print(ix, ", ", iy)
+        # print(ix, ", ", iy)
         vid = "Vertex ({}, {})"
         vg = "g = {}"
         vh = "h = {}"
         vf = "f = {}"
         infoLabel = Label(window, text=vid.format(ix, iy))
-        ourVertex = verticies[columns * ix + iy]
+        ourVertex = verticies[rows * ix + iy]
         ourH = h(ourVertex)
         gLabel = Label(window, text=vg.format(ourVertex.g))
         hLabel = Label(window, text=vh.format(ourH))
@@ -148,6 +164,6 @@ def displayPath(fileName, shortestPath):
 
 
 verticies = []
-random_grids.makeRandomGrids(100, 50, 12)
+random_grids.makeRandomGrids(100, 50, 50)
 path = initPath("grid2.txt")
 displayPath("grid2.txt", path)
