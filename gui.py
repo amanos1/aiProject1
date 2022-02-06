@@ -165,5 +165,5 @@ def displayPath(fileName, shortestPath):
 
 verticies = []
 random_grids.makeRandomGrids(100, 50, 50)
-path = initPath("grid2.txt")
-displayPath("grid2.txt", path)
+path = initPath("grids/grid2.txt")
+displayPath("grids/grid2.txt", path)

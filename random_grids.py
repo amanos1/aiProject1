@@ -4,7 +4,7 @@ from math import ceil
 
 def makeRandomGrids(columns, rows, amount):
     for i in range(1, amount+1):
-        fileName = "grid{}.txt"
+        fileName = "grids/grid{}.txt"
         f = open(fileName.format(i), 'w')
         firstThree = "{} {}\n"
         sx = random.randrange(1, rows+1)
