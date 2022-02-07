@@ -1,67 +1,14 @@
 from tkinter import *
-from math import sqrt
 import random_grids
+import astar
 
 
-class Vertex:
-    def __init__(this, x, y):
-        this.x = x
-        this.y = y
-        this.g = 0
-        this.h = 0
-        this.f = 0
+columns = 0
+rows = 0
+verticies = []
 
 
 def initPath(fileName):
-    f = open(fileName, "r")
-    file = f.read()
-    fNums = file.split()
-    fIndex = 0
-    startx = int(fNums[fIndex])
-    fIndex += 1
-    starty = int(fNums[fIndex])
-    fIndex += 1
-    goalx = int(fNums[fIndex])
-    fIndex += 1
-    goaly = int(fNums[fIndex])
-    fIndex += 1
-    columns = int(fNums[fIndex])
-    fIndex += 1
-    rows = int(fNums[fIndex])
-    fIndex += 1
-    f.close()
-
-    # to access a vertex: verticies[columns * x + y]
-    for i in range(columns+1):
-        for j in range(rows+1):
-            singleVertetx = Vertex(i, j)
-            verticies.append(singleVertetx)
-
-    for i in range(columns+1):
-        for j in range(rows+1):
-            verticies[rows * i + j].neighbors = []
-            if i > 0:
-                verticies[rows * i + j].neighbors.append(verticies[rows * (i - 1) + j])
-                if j > 0:
-                    verticies[rows * i + j].neighbors.append(verticies[rows * (i - 1) + (j - 1)])
-                if j < rows:
-                    verticies[rows * i + j].neighbors.append(verticies[rows * (i - 1) + (j + 1)])
-            if i < columns:
-                verticies[rows * i + j].neighbors.append(verticies[rows * (i + 1) + j])
-                if j > 0:
-                    verticies[rows * i + j].neighbors.append(verticies[rows * (i + 1) + (j - 1)])
-                if j < rows:
-                    verticies[rows * i + j].neighbors.append(verticies[rows * (i + 1) + (j + 1)])
-            if j > 0:
-                verticies[rows * i + j].neighbors.append(verticies[rows * i + (j - 1)])
-            if j < rows:
-                verticies[rows * i + j].neighbors.append(verticies[rows * i + (j + 1)])
-
-    path = [verticies[rows*1+3], verticies[rows*2+2], verticies[rows*2+1], verticies[rows*1+0]]
-    return path
-
-
-def displayPath(fileName, shortestPath):
     f = open(fileName, "r")
     file = f.read()
     fNums = file.split()
@@ -78,50 +25,54 @@ def displayPath(fileName, shortestPath):
     fIndex += 1
     rows = int(fNums[fIndex])
     fIndex += 1
+    f.close()
 
-    def h(v):
-        m1 = min(abs(v.x-gx), abs(v.y-gy))
-        m2 = max(abs(v.x-gx), abs(v.y-gy))
-        return sqrt(2) * m1 + m2 - m1
+    goal = (gx, gy)
+    start = (sx, sy)
 
-    for i in verticies:
-        i.h = h(i)
-        i.f = i.g + i.f
+    # to access a vertex: verticies[columns * x + y]
+    for i in range(columns+1):
+        for j in range(rows+1):
+            singleVertetx = astar.point(i, j, False, float('inf'), astar.H(goal, (i, j)), None)
+            verticies.append(singleVertetx)
+
+    for i in range(columns):
+        for j in range(rows):
+            blockY = int(fNums[fIndex])
+            fIndex += 1
+            blockX = int(fNums[fIndex])
+            fIndex += 1
+            on = int(fNums[fIndex])
+            fIndex += 1
+            verticies[rows * i + j].b = on == 1
+
+    shortestPath = astar.search(verticies, verticies[rows * goal[0] + goal[1]], verticies[rows * start[0] + start[1]])
+
+    return (goal, start), shortestPath
+
+
+def displayPath(shortestPath, gs):
+    s = gs[0]
+    g = gs[0]
 
     # creating the window
     window = Tk()
     window.title("Grid visualizer")
-    # window.geometry("500x500")
 
     daCanvas = Canvas(window, width=1020, height=520, bg="white")
 
-    # daCanvas.create_line(x1, y1, x2, y2, fill="color")
-    # daCanvas.create_rectangle(x1, y1, x2, y2, fill="color")
-    # daCanvas.create_text()
-
-
     for i in range(1, columns + 2):
         daCanvas.create_line(i*10, 10, i*10, 510, fill="black")
+        for j in range(1, rows + 2):
+            if i == 1:
+                daCanvas.create_line(10, j*10, 1010, j*10, fill="black")
+            if verticies[rows * i + j].b:
+                daCanvas.create_rectangle(j*10, i*10, (j*10)+10, (i*10)+10, fill="grey")
 
-    for i in range(1, rows + 2):
-        daCanvas.create_line(10, i*10, 1010, i*10, fill="black")
-
-    for i in range(rows * columns):
-        blockY = int(fNums[fIndex])
-        fIndex += 1
-        blockX = int(fNums[fIndex])
-        fIndex += 1
-        on = int(fNums[fIndex])
-        fIndex += 1
-        if on == 1:
-            daCanvas.create_rectangle(blockY*10, blockX*10, (blockY*10)+10, (blockX*10)+10, fill="grey")
-
-    f.close()
-
-    daCanvas.create_oval((10*sx)-3, (10*sy)-3, (10*sx)+3, (10*sy)+3, fill="black")
-    daCanvas.create_text((10*sx)+20, (10*sy)+15, text="start", fill="black")
-    daCanvas.create_oval((10*gx)-3, (10*gy)-3, (10*gx)+3, (10*gy)+3, fill="black")
-    daCanvas.create_text((10*gx)+20, (10*gy)+15, text="goal", fill="black")
+    daCanvas.create_oval((10*s[0])-3, (10*s[1])-3, (10*s[0])+3, (10*s[1])+3, fill="green")
+    # daCanvas.create_text((10*sx)+20, (10*sy)+15, text="start", fill="black")
+    daCanvas.create_oval((10*g[0])-3, (10*g[1])-3, (10*g[0])+3, (10*g[1])+3, fill="red")
+    # daCanvas.create_text((10*gx)+20, (10*gy)+15, text="goal", fill="black")
 
     for i in range(1, len(shortestPath)):
         v1 = shortestPath[i-1]
@@ -145,10 +96,9 @@ def displayPath(fileName, shortestPath):
         vf = "f = {}"
         infoLabel = Label(window, text=vid.format(ix, iy))
         ourVertex = verticies[rows * ix + iy]
-        ourH = h(ourVertex)
         gLabel = Label(window, text=vg.format(ourVertex.g))
-        hLabel = Label(window, text=vh.format(ourH))
-        fLabel = Label(window, text=vf.format(ourVertex.g+ourH))
+        hLabel = Label(window, text=vh.format(ourVertex.h))
+        fLabel = Label(window, text=vf.format(int(ourVertex)))
         infoLabel.grid(row=2, column=1)
         gLabel.grid(row=3, column=1)
         hLabel.grid(row=4, column=1)
@@ -157,13 +107,11 @@ def displayPath(fileName, shortestPath):
     infoButton = Button(window, text="Get Info", command=getInfo)
     infoButton.grid(row=1, column=2)
 
-    myLabel = Label(window, text="Geronimooo!")
-    #myLabel.pack()
-
     window.mainloop()
 
 
-verticies = []
-random_grids.makeRandomGrids(100, 50, 50)
-path = initPath("grids/grid2.txt")
-displayPath("grids/grid2.txt", path)
+def run(file):
+    random_grids.makeRandomGrids(100, 50, 50)
+    # gsp = goal, start, path
+    gsp = initPath(file)
+    displayPath(gsp[1], gsp[0])

@@ -31,13 +31,13 @@ class binHeap:
         if 2*k >= self.size-1: return
         j = 2*k
         if j < self.size-2 and self.elements[j] < self.elements[j+1]: j += 1
-        if self.elements[j].f < self.elements[k].f: return
+        if int(self.elements[j]) < int(self.elements[k]): return
         self.ex(j, k)
         self.sink(j)
 
     def swim(self, k):
         if k <= 1: return
-        if self.elements[k].f > self.elements[k/2].f:
+        if int(self.elements[k]) > int(self.elements[k/2]):
             self.ex(k, k/2)
             self.swim(k/2)
 

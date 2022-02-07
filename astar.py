@@ -7,6 +7,8 @@ import math
 from typing import List, Any
 columns = 5
 rows = 3
+
+
 class point:
     def __init__(self, x, y, b, g, h, p):
         self.x = x
@@ -24,22 +26,30 @@ class point:
 
     def setH(self, h):
         self.h = h
+
     def __lt__(self, other):
         return self.getF() < other.getF()
+
     def __int__(self):
         return self.g + self.h
+
     def getF(self):
         return self.g + self.h
+
     def __str__(self):
         return "c: " + str(self.x) + " " + str(self.y) + " " + str(self.b)
 
 fringe = []
 closed = set()
-def H(g, p):#takes 2 tuples
+
+
+def H(g, p): #takes 2 tuples
     xdiff = math.fabs(p[0] - g[0])
     ydiff = math.fabs(p[1] - g[1])
     dist = math.sqrt(2)*min(xdiff, ydiff) + max(xdiff, ydiff) - min(xdiff, ydiff)
     return dist
+
+
 def succ(verts, p, gx, gy):
     s = set()
     i = (p.x-1)+gx*(p.y-1)
@@ -89,6 +99,8 @@ def succ(verts, p, gx, gy):
             s.add(verts[i+(gx+1)])#down right
             s.add(verts[i+gx])#down
     return s
+
+
 def Astar(verts,goal,start):
     g = goal
     start.setG(0)
@@ -107,7 +119,9 @@ def Astar(verts,goal,start):
                     sstar.setP(None)
                 UpdateVertex(s,sstar)
     return "no path found"
-def UpdateVertex(s,sstar):
+
+
+def UpdateVertex(s, sstar):
     if ( s.g + H((s.x,s.y),(sstar.x,sstar.y)) ) < sstar.g:
         sstar.setG(s.g + H((s.x,s.y),(sstar.x,sstar.y)))
         sstar.setP(s)
@@ -115,28 +129,14 @@ def UpdateVertex(s,sstar):
             fringe.remove(sstar)
         heapq.heappush(fringe, sstar)
         heapq.heapify(fringe)
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    s = (4, 1)
-    g = (1, 3)
-    verts = []
-    for j in range(1,4):
-        for i in range(1, 6):
-            verts.append(point(i, j, False, float('inf'), H(g,(i,j)), None))
-    #trial blocks
-    verts[1].b = True
-    verts[7].b = True
 
-    for i in range(10,15):
-        verts[i].b = True
-    # start = verts[3] goal = verts[10]
-    print(Astar(verts, verts[10], verts[3]))
+
+def search(verts, goal, start):
+    Astar(verts, goal, start)
     nice = []
-    node = verts[10]
-    while (node.x, node.y) != s:
+    node = verts[goal]
+    while (node.x, node.y) != start:
         nice.append(node)
         node = node.p
     nice.append(node)
-    for i in nice:
-        print(i)
-
+    return nice
