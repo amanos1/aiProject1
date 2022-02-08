@@ -1,5 +1,4 @@
 from tkinter import *
-import random_grids
 import astar
 
 
@@ -8,13 +7,19 @@ rows = 0
 verticies = []
 
 
-def initPath(fileName):
+# creates the grid based on an input file
+# and finds the shortest path between the start and goal vertices given in the file
+def initPath(fileName, a):
     global columns
     global rows
 
+    # opens the file and puts it's information on a string
     f = open(fileName, "r")
     file = f.read()
     fNums = file.split()
+    f.close()
+
+    # read the start, goal, and total columns and rows from the file
     fIndex = 0
     sx = int(fNums[fIndex])
     fIndex += 1
@@ -28,18 +33,18 @@ def initPath(fileName):
     fIndex += 1
     rows = int(fNums[fIndex])
     fIndex += 1
-    f.close()
 
     goal = (gx, gy)
     start = (sx, sy)
 
-    # to access a vertex: verticies[columns * x + y]
+    # creates each of the vertices in the grid
+    # to access a point: verticies[(columns+1) * (y-1) + (x-1)]
     for j in range(rows + 1):
         for i in range(columns+1):
             singleVertetx = astar.point(i+1, j+1, False, float('inf'), astar.H(goal, (i+1, j+1)), None)
             verticies.append(singleVertetx)
 
-    # to access a point: verticies[(columns+1) * (y-1) + (x-1)]
+    # determines weather each cell is blocked, based on the file
     for i in range(columns):
         for j in range(rows):
             blockX = int(fNums[fIndex])
@@ -50,11 +55,17 @@ def initPath(fileName):
             fIndex += 1
             verticies[(columns+1) * (blockY-1)+ (blockX-1)].b = on == 1
 
-    shortestPath = astar.search(verticies, verticies[(columns+1) * (goal[1]-1) + (goal[0]-1)], verticies[(columns+1) * (start[1]-1) + (start[0]-1)], columns, rows)
+    # runs either a* or theta* to find the shortest path between the start vertex and the goal vertex
+    shortestPath = []
+    if a:
+        shortestPath = astar.search(verticies, verticies[(columns+1) * (goal[1]-1) + (goal[0]-1)], verticies[(columns+1) * (start[1]-1) + (start[0]-1)], columns, rows)
+    else:
+        shortestPath = astar.search(verticies, verticies[(columns+1) * (goal[1]-1) + (goal[0]-1)], verticies[(columns+1) * (start[1]-1) + (start[0]-1)], columns, rows)
 
     return (goal, start), shortestPath
 
 
+# displays the grid and displays the given shortest path between the given start and goal points
 def displayPath(shortestPath, gs):
     s = gs[1]
     g = gs[0]
@@ -62,9 +73,9 @@ def displayPath(shortestPath, gs):
     # creating the window
     window = Tk()
     window.title("Grid visualizer")
-
     daCanvas = Canvas(window, width=1020, height=520, bg="white")
 
+    # drawing the grids and the blocked cells
     for i in range(1, columns + 2):
         daCanvas.create_line(i*10, 10, i*10, 510, fill="black")
         for j in range(1, rows + 2):
@@ -73,9 +84,11 @@ def displayPath(shortestPath, gs):
             if verticies[(columns+1) * (j-1) + (i-1)].b:
                 daCanvas.create_rectangle(i*10, j*10, (i*10)+10, (j*10)+10, fill="grey")
 
+    # drawing the start and goal points
     daCanvas.create_oval((10*s[0])-3, (10*s[1])-3, (10*s[0])+3, (10*s[1])+3, fill="green")
     daCanvas.create_oval((10*g[0])-3, (10*g[1])-3, (10*g[0])+3, (10*g[1])+3, fill="red")
 
+    # drawing the path returned by the a* or theta* function
     for i in range(1, len(shortestPath)):
         v1 = shortestPath[i-1]
         v2 = shortestPath[i]
@@ -83,6 +96,7 @@ def displayPath(shortestPath, gs):
 
     daCanvas.grid(row=0, columnspan=3)
 
+    # making the input boxes to get information about a single vertex
     infoX = Entry(window)
     infoY = Entry(window)
     infoX.insert(0, "x value")
@@ -90,18 +104,25 @@ def displayPath(shortestPath, gs):
     infoX.grid(row=1, column=0)
     infoY.grid(row=1, column=1)
 
+    # runs when the "get info" button is pressed. Displays a vertex's information.
     def getInfo():
+        # filling the areas with nothing beforehand so new and old information don't overlap
         nothing = Label(window, text="")
         nothing.grid(row=2, column=1)
         nothing.grid(row=3, column=1)
         nothing.grid(row=4, column=1)
         nothing.grid(row=5, column=1)
+
+        # getting the vertex from the input fields
         ix = int(infoX.get())
         iy = int(infoY.get())
+
         vid = "Vertex ({}, {})"
         vg = "g = {}"
         vh = "h = {}"
         vf = "f = {}"
+
+        # display the information
         infoLabel = Label(window, text=vid.format(ix, iy))
         ourVertex = verticies[(columns+1) * (iy-1) + (ix-1)]
         gLabel = Label(window, text=vg.format(ourVertex.g))
@@ -112,14 +133,15 @@ def displayPath(shortestPath, gs):
         hLabel.grid(row=4, column=1)
         fLabel.grid(row=5, column=1)
 
+    # display the button that initiates the getInfo function
     infoButton = Button(window, text="Get Info", command=getInfo)
     infoButton.grid(row=1, column=2)
 
+    # display the window
     window.mainloop()
 
 
-def run(file):
-    # random_grids.makeRandomGrids(100, 50, 50)
+def run(file, a):
     # gsp = goal, start, path
-    gsp = initPath(file)
+    gsp = initPath(file, a)
     displayPath(gsp[1], gsp[0])
