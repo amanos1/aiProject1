@@ -4,9 +4,12 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import heapq
 import math
+import bin_heap
 from typing import List, Any
-columns = 5
-rows = 3
+
+
+fringe = []
+closed = set()
 
 
 class point:
@@ -39,103 +42,103 @@ class point:
     def __str__(self):
         return "c: " + str(self.x) + " " + str(self.y) + " " + str(self.b)
 
-fringe = []
-closed = set()
+    def equals(self, p):
+        return self.x == p.x and self.y == p.y
 
 
 def H(g, p): #takes 2 tuples
     xdiff = math.fabs(p[0] - g[0])
     ydiff = math.fabs(p[1] - g[1])
-    dist = math.sqrt(2)*min(xdiff, ydiff) + max(xdiff, ydiff) - min(xdiff, ydiff)
+    dist = math.sqrt(2) * min(xdiff, ydiff) + max(xdiff, ydiff) - min(xdiff, ydiff)
     return dist
 
 
-def succ(verts, p, gx, gy):
+def C(s1, s2):
+    xdiff = math.fabs(s1.x - s2.x)
+    ydiff = math.fabs(s1.y - s2.y)
+    return math.sqrt(math.pow(xdiff, 2) + math.pow(ydiff, 2))
+
+
+def isBlocked(verts, i, cols):
+    if i < 0: return True
+    if i > len(verts)-cols: return True  # it's on the last row
+    return verts[i].b
+
+
+def succ(verts, p, cols, row):
     s = set()
-    i = (p.x-1)+gx*(p.y-1)
-    if p.x>1:
-        if not verts[i-1].b:
+    i = (p.x-1) + (cols+1) * (p.y-1)
+    u = False
+    l = False
+    r = False
+    d = False
+    if p.x > 1:
+        if not (isBlocked(verts, i-1, cols) and isBlocked(verts, i-cols-2, cols)):
             s.add(verts[i-1])
-        l = True
-    else:
-        l = False
-    if p.x<gx:
-        if not verts[i].b:
+            l = True
+    if p.x <= cols:
+        if not (isBlocked(verts, i, cols) and isBlocked(verts, i-cols-1, cols)):
             s.add(verts[i+1])
-        r = True
-    else:
-        r = False
-    if p.y>1:
-        if not verts[i-gx].b:
-            s.add(verts[i-gx])
-        u = True
-    else:
-        u = False
-    if p.y<gy:
-        if not verts[i].b:
-            s.add(verts[i+gx])
-        d = True
-    else:
-        d = False
+            r = True
+    if p.y > 1:
+        if not (isBlocked(verts, i-cols-1, cols) and isBlocked(verts, i-cols-2, cols)):
+            s.add(verts[i-cols-1])
+            u = True
+    if p.y <= row:
+        if not (isBlocked(verts, i, cols) and isBlocked(verts, i-1, cols)):
+            s.add(verts[i+cols+1])
+            d = True
 
     if u and l:
-        if not verts[i-(gx+1)].b:
-            s.add(verts[i-(gx+1)])#up left
-            s.add(verts[i-gx])#up
-            s.add(verts[i-1])#left
+        if not isBlocked(verts, i-cols-2, cols):
+            s.add(verts[i-cols-2])  # up left
     if l and d:
-        if not verts[i-1].b:
-            s.add(verts[i+(gx-1)])#down left
-            s.add(verts[i-1])#left
-            s.add(verts[i+gx])#down
+        if not isBlocked(verts, i-1, cols):
+            s.add(verts[i+cols])  # down left
     if u and r:
-        if not verts[i-5].b:
-            s.add(verts[i-(gx-1)])#up right
-            s.add(verts[i-gx])#up
-            s.add(verts[i+1])#right
+        if not isBlocked(verts, i-cols-1, cols):
+            s.add(verts[i-cols])  # up right
     if d and r:
-        if not verts[i].b:
-            s.add(verts[i+1])#right
-            s.add(verts[i+(gx+1)])#down right
-            s.add(verts[i+gx])#down
+        if not isBlocked(verts, i, cols):
+            s.add(verts[i+cols+2])  # down right
     return s
 
 
-def Astar(verts,goal,start):
-    g = goal
+def Astar(verts, goal, start):
     start.setG(0)
     start.setP(start)
-    heapq.heapify(fringe)
     heapq.heappush(fringe, start)
-    while fringe:
+    while len(fringe) != 0:
         s = heapq.heappop(fringe)
-        if s.x == g.x and s.y == g.y:
-            return "path found"
+        if s.equals(goal):
+            return True
         closed.add(s)
-        for sstar in succ(verts,s,columns,rows):
-            if sstar not in closed:
-                if sstar not in fringe:
-                    sstar.setG(float('inf'))
-                    sstar.setP(None)
-                UpdateVertex(s,sstar)
-    return "no path found"
+        for sstar in succ(verts, s, columns, rows):
+            if not (sstar in closed):
+                UpdateVertex(s, sstar)
+    return False
 
 
 def UpdateVertex(s, sstar):
-    if ( s.g + H((s.x,s.y),(sstar.x,sstar.y)) ) < sstar.g:
-        sstar.setG(s.g + H((s.x,s.y),(sstar.x,sstar.y)))
+    if (s.g + C(s, sstar)) < sstar.g:
+        sstar.setG(s.g + C(s, sstar))
         sstar.setP(s)
         if sstar in fringe:
             fringe.remove(sstar)
+            heapq.heapify(fringe)
         heapq.heappush(fringe, sstar)
-        heapq.heapify(fringe)
 
 
-def search(verts, goal, start):
-    Astar(verts, goal, start)
+def search(verts, goal, start, col, row):
+    global columns
+    global rows
+    columns = col
+    rows = row
     nice = []
-    node = verts[goal]
-    while (node.x, node.y) != start:
+    if not Astar(verts, goal, start):
+        return nice
+    node = goal
+    while not node.equals(start):
         nice.append(node)
         node = node.p
     nice.append(node)

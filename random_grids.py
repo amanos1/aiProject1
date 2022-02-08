@@ -7,13 +7,13 @@ def makeRandomGrids(columns, rows, amount):
         fileName = "grids/grid{}.txt"
         f = open(fileName.format(i), 'w')
         firstThree = "{} {}\n"
-        sx = random.randrange(1, rows+1)
-        sy = random.randrange(1, columns+1)
+        sx = random.randrange(1, columns+1)
+        sy = random.randrange(1, rows+1)
         gx = sx
         gy = sy
         while gx == sx and gy == sy:
-            gx = random.randrange(1, rows+1)
-            gy = random.randrange(1, columns+1)
+            gx = random.randrange(1, columns+1)
+            gy = random.randrange(1, rows+1)
         f.write(firstThree.format(sx, sy))
         f.write(firstThree.format(gx, gy))
         f.write(firstThree.format(columns, rows))

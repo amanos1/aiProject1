@@ -1,4 +1,6 @@
 import gui
+import sys
 
 if __name__ == '__main__':
-    gui.run("grids/grid2.txt")
+    print(sys.argv)
+    gui.run("grids/grid48.txt")
