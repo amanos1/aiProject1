@@ -102,34 +102,34 @@ def thetaStar(goal, start, verts):
         closed.add(s)
         for sstar in succ(verts, s):
             if sstar not in closed:
-                UpdateVertex(s,sstar,verts)
+                UpdateVertex(s, sstar, verts)
     return False
 
 
-def UpdateVertex(s,sstar,verts):
-    if LineOfSight(s.p, sstar,verts):
-        if (s.p.g+math.dist([s.p.x,s.p.y],[sstar.x,sstar.y]))<sstar.g:
-            sstar.g = s.p.g + math.dist([s.p.x,s.p.y],[sstar.x,sstar.y])
+def UpdateVertex(s, sstar, verts):
+    if LineOfSight(s.p, sstar, verts):
+        if (s.p.g+math.dist([s.p.x, s.p.y], [sstar.x, sstar.y])) < sstar.g:
+            sstar.g = s.p.g + math.dist([s.p.x, s.p.y], [sstar.x, sstar.y])
             sstar.p = s.p
             if sstar in fringe:
                 fringe.remove(sstar)
             heapq.heapify(fringe)
-            heapq.heappush(fringe,sstar)
+            heapq.heappush(fringe, sstar)
     else:
         if s.g + math.dist([s.x, s.y], [sstar.x, sstar.y]) < sstar.g:
-            sstar.g = s.g + math.dist([s.x,s.y],[sstar.x,sstar.y])
+            sstar.g = s.g + math.dist([s.x, s.y], [sstar.x, sstar.y])
             sstar.p = s
             if sstar in fringe:
                 fringe.remove(sstar)
-            heapq.heappush(fringe,sstar)
+            heapq.heappush(fringe, sstar)
             heapq.heapify(fringe)
 
 
 def grid(x, y, verts):
-    return verts[(x - 1) + (columns+1) * (y - 1)].b
+    return verts[(x-1) + (columns+1) * (y-1)].b
 
 
-def LineOfSight(s,sstar,verts):
+def LineOfSight(s, sstar, verts):
     x0 = int(s.x)
     y0 = int(s.y)
     x1 = int(sstar.x)
@@ -139,42 +139,42 @@ def LineOfSight(s,sstar,verts):
     dx = int(x1-x0)
     sy = int(0)
     sx = int(0)
-    if dy<0:
+    if dy < 0:
         dy = -1*dy
         sy = -1
     else:
         sy = 1
-    if dx<0:
+    if dx < 0:
         dx = -1*dx
         sx = -1
     else:
         sx = 1
-    if dx>=dy:
-        while x0!=x1:
-            f = f+dy
-            if f>=dx:
-                if grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
+    if dx >= dy:
+        while x0 != x1:
+            f = f + dy
+            if f >= dx:
+                if grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)), verts):
                     return False
-                y0 = y0+sy
-                f = f-dx
-            if f!=0 and grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
+                y0 = y0 + sy
+                f = f - dx
+            if f != 0 and grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)), verts):
                 return False
-            if dy==0 and grid(int(x0+((sx-1)/2)), int(y0),verts) and grid(int(x0+((sx-1)/2)), int(y0-1),verts):
+            if dy == 0 and grid(int(x0+((sx-1)/2)), int(y0),verts) and grid(int(x0+((sx-1)/2)), int(y0-1), verts):
                 return False
-            x0 = x0+sx
+            x0 = x0 + sx
     else:
-        while y0!=y1:
-            f = f+dx
-            if f>=dy:
-                if grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
+        while y0 != y1:
+            f = f + dx
+            if f >= dy:
+                if grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)), verts):
                     return False
                 x0 = x0 + sx
-                f = f-dy
-            if f!=0 and grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
+                f = f - dy
+            if f != 0 and grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
                 return False
-            if dx==0 and grid(int(x0),int(y0+((sy-1)/2)),verts) and grid(int(x0-1),int(y0+((sy-1)/2)),verts):
+            if dx == 0 and grid(int(x0), int(y0+((sy-1)/2)), verts) and grid(int(x0-1), int(y0+((sy-1)/2)), verts):
                 return False
-            y0 = y0+sy
+            y0 = y0 + sy
     return True
 
 
