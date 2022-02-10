@@ -1,17 +1,12 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import heapq
 import math
-import bin_heap
-from typing import List, Any
 
 
 fringe = []
 closed = set()
 
 
+# Object that represents a single vertex
 class point:
     def __init__(self, x, y, b, g, h, p):
         self.x = x
@@ -46,25 +41,29 @@ class point:
         return self.x == p.x and self.y == p.y
 
 
-def H(g, p): #takes 2 tuples
+# calculates the h value of a vertex, takes 2 tuples
+def H(g, p):
     xdiff = math.fabs(p[0] - g[0])
     ydiff = math.fabs(p[1] - g[1])
     dist = math.sqrt(2) * min(xdiff, ydiff) + max(xdiff, ydiff) - min(xdiff, ydiff)
     return dist
 
 
+# calculates the straight-line distance between two points
 def C(s1, s2):
     xdiff = math.fabs(s1.x - s2.x)
     ydiff = math.fabs(s1.y - s2.y)
     return math.sqrt(math.pow(xdiff, 2) + math.pow(ydiff, 2))
 
 
+# returns whether or not a given cell is blocked
 def isBlocked(verts, i, cols):
     if i < 0: return True
     if i > len(verts)-cols: return True  # it's on the last row
     return verts[i].b
 
 
+# returns a list of the points surrounding p that can be travelled to
 def succ(verts, p, cols, row):
     s = set()
     i = (p.x-1) + (cols+1) * (p.y-1)
@@ -72,6 +71,8 @@ def succ(verts, p, cols, row):
     l = False
     r = False
     d = False
+
+    # horizontal/vertical points
     if p.x > 1:
         if not (isBlocked(verts, i-1, cols) and isBlocked(verts, i-cols-2, cols)):
             s.add(verts[i-1])
@@ -89,6 +90,7 @@ def succ(verts, p, cols, row):
             s.add(verts[i+cols+1])
             d = True
 
+    # diagonal points
     if u and l:
         if not isBlocked(verts, i-cols-2, cols):
             s.add(verts[i-cols-2])  # up left
@@ -104,11 +106,12 @@ def succ(verts, p, cols, row):
     return s
 
 
+# executes the astar search
 def Astar(verts, goal, start):
     start.setG(0)
     start.setP(start)
     heapq.heappush(fringe, start)
-    while len(fringe) != 0:
+    while fringe:
         s = heapq.heappop(fringe)
         if s.equals(goal):
             return True
@@ -143,3 +146,11 @@ def search(verts, goal, start, col, row):
         node = node.p
     nice.append(node)
     return nice
+
+
+def checkPath(verts, goal, start, col, row):
+    global columns
+    global rows
+    columns = col
+    rows = row
+    return Astar(verts, goal, start)

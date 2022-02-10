@@ -1,5 +1,6 @@
 from tkinter import *
 import astar
+import thetastar
 
 
 columns = 0
@@ -60,7 +61,7 @@ def initPath(fileName, a):
     if a:
         shortestPath = astar.search(verticies, verticies[(columns+1) * (goal[1]-1) + (goal[0]-1)], verticies[(columns+1) * (start[1]-1) + (start[0]-1)], columns, rows)
     else:
-        shortestPath = astar.search(verticies, verticies[(columns+1) * (goal[1]-1) + (goal[0]-1)], verticies[(columns+1) * (start[1]-1) + (start[0]-1)], columns, rows)
+        shortestPath = thetastar.search(verticies, verticies[(columns+1) * (goal[1]-1) + (goal[0]-1)], verticies[(columns+1) * (start[1]-1) + (start[0]-1)], columns, rows)
 
     return (goal, start), shortestPath
 
@@ -85,8 +86,8 @@ def displayPath(shortestPath, gs):
                 daCanvas.create_rectangle(i*10, j*10, (i*10)+10, (j*10)+10, fill="grey")
 
     # drawing the start and goal points
-    daCanvas.create_oval((10*s[0])-3, (10*s[1])-3, (10*s[0])+3, (10*s[1])+3, fill="green")
-    daCanvas.create_oval((10*g[0])-3, (10*g[1])-3, (10*g[0])+3, (10*g[1])+3, fill="red")
+    daCanvas.create_oval((10*s[0])-4, (10*s[1])-4, (10*s[0])+4, (10*s[1])+4, fill="green")
+    daCanvas.create_oval((10*g[0])-4, (10*g[1])-4, (10*g[0])+4, (10*g[1])+4, fill="red")
 
     # drawing the path returned by the a* or theta* function
     for i in range(1, len(shortestPath)):
@@ -106,12 +107,8 @@ def displayPath(shortestPath, gs):
 
     # runs when the "get info" button is pressed. Displays a vertex's information.
     def getInfo():
-        # filling the areas with nothing beforehand so new and old information don't overlap
-        nothing = Label(window, text="")
-        nothing.grid(row=2, column=1)
-        nothing.grid(row=3, column=1)
-        nothing.grid(row=4, column=1)
-        nothing.grid(row=5, column=1)
+        # deleting the previous point
+        daCanvas.delete("infoPoint")
 
         # getting the vertex from the input fields
         ix = int(infoX.get())
@@ -132,6 +129,9 @@ def displayPath(shortestPath, gs):
         gLabel.grid(row=3, column=1)
         hLabel.grid(row=4, column=1)
         fLabel.grid(row=5, column=1)
+
+        point = daCanvas.create_oval((10*ix)-4, (10*iy)-4, (10*ix)+4, (10*iy)+4, fill="black", tags="infoPoint")
+        # daCanvas.after(5000, daCanvas.delete("infoPoint"))
 
     # display the button that initiates the getInfo function
     infoButton = Button(window, text="Get Info", command=getInfo)
