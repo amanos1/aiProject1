@@ -4,7 +4,6 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import heapq
 import math
-from typing import List, Any
 rows = 3
 columns = 5
 class point:
@@ -32,15 +31,9 @@ class point:
         return self.g + self.h
     def __str__(self):
         return "c: " + str(self.x) + " " + str(self.y) + " " + str(self.b)
-
 fringe = []
 closed = set()
-def H(g, p):
-    xdiff = math.fabs(p[0] - g[0])
-    ydiff = math.fabs(p[1] - g[1])
-    dist = math.sqrt(2)*min(xdiff, ydiff) + max(xdiff, ydiff) - min(xdiff, ydiff)
-    return dist
-def succ(verts, p):
+def succ(p,verts):
     s = set()
     i = (p.x-1)+columns*(p.y-1)
     if p.x>1:
@@ -89,7 +82,7 @@ def succ(verts, p):
             s.add(verts[i+(columns+1)])#down right
             s.add(verts[i+columns])#down
     return s
-def Astar(verts,goal,start):
+def thetaStar(goal,start,verts):
     g = goal
     start.setG(0)
     start.setP(start)
@@ -100,16 +93,16 @@ def Astar(verts,goal,start):
         if s.x == g.x and s.y == g.y:
             return "path found"
         closed.add(s)
-        for sstar in succ(verts,s):
+        for sstar in succ(s,verts):
             if sstar not in closed:
                 if sstar not in fringe:
                     sstar.setG(float('inf'))
                     sstar.setP(None)
-                UpdateVertex(verts,s,sstar)
+                UpdateVertex(s,sstar,verts)
     return "no path found"
-def UpdateVertex(verts,s,sstar):
-    if LineOfSight(verts,s.p, sstar):
-        if (sstar.g+math.dist([s.p.x,s.p.y],[sstar.x,sstar.y]))<sstar.g:
+def UpdateVertex(s,sstar,verts):
+    if LineOfSight(s.p, sstar,verts):
+        if (s.p.g+math.dist([s.p.x,s.p.y],[sstar.x,sstar.y]))<sstar.g:
             sstar.g = s.p.g + math.dist([s.p.x,s.p.y],[sstar.x,sstar.y])
             sstar.p = s.p
             if sstar in fringe:
@@ -126,48 +119,52 @@ def UpdateVertex(verts,s,sstar):
             heapq.heapify(fringe)
 def grid(x,y,verts):
     return verts[(x - 1) + columns * (y - 1)].b
-def LineOfSight(verts,s,sstar):
+def LineOfSight(s,sstar,verts):
     x0 = int(s.x)
     y0 = int(s.y)
     x1 = int(sstar.x)
     y1 = int(sstar.y)
-    f = 0
+    f = int(0)
     dy = int(y1-y0)
     dx = int(x1-x0)
+    sy = int(0)
+    sx = int(0)
     if dy<0:
         dy = -1*dy
-        s.y = -1
+        sy = -1
     else:
-        s.y = 1
+        sy = 1
     if dx<0:
         dx = -1*dx
-        s.x = -1
+        sx = -1
     else:
-        s.x = 1
+        sx = 1
     if dx>=dy:
         while x0!=x1:
             f = f+dy
-            if f<dx:
-                if grid(int(x0+((s.x-1)/2)), int(y0+((s.y-1)/2)),verts):
+            if f>=dx:
+                if grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
                     return False
-            y0 = y0+s.y
-            f = f-dx
-            if f!=0 and grid(int(x0+((s.x-1)/2)), int(y0+((s.y-1)/2)),verts):
+                y0 = y0+sy
+                f = f-dx
+            if f!=0 and grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
                 return False
-            if dy==0 and grid(int(x0+((s.x-1)/2)), int(y0),verts) and grid(int(x0+((s.x-1)/2)), int(y0-1),verts):
+            if dy==0 and grid(int(x0+((sx-1)/2)), int(y0),verts) and grid(int(x0+((sx-1)/2)), int(y0-1),verts):
                 return False
-            x0 = x0+s.x
+            x0 = x0+sx
     else:
         while y0!=y1:
             f = f+dx
             if f>=dy:
-                if grid(int(x0+((s.x-1)/2)), int(y0+((s.y-1)/2)),verts):
+                if grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
                     return False
-                x0 = x0 + s.x
+                x0 = x0 + sx
                 f = f-dy
-            if f!=0 and grid(int(x0+((s.x-1)/2)), int(y0+((s.y-1)/2)),verts) and grid(int(x0-1), int(y0+((s.y-1)/2)),verts):
+            if f!=0 and grid(int(x0+((sx-1)/2)), int(y0+((sy-1)/2)),verts):
                 return False
-            y0 = y0+s.y
+            if dx==0 and grid(int(x0),int(y0+((sy-1)/2)),verts) and grid(int(x0-1),int(y0+((sy-1)/2)),verts):
+                return False
+            y0 = y0+sy
     return True
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -176,12 +173,22 @@ if __name__ == '__main__':
     verts = []
     for j in range(1,4):
         for i in range(1, 6):
-            verts.append(point(i, j, False, float('inf'), H(gl,(i,j)), None))
+            verts.append(point(i, j, False, float('inf'), 0, None))
     #trial blocks
     verts[1].b = True
-    verts[7].b = True
+    verts[8].b = True
 
     for i in range(10,15):
         verts[i].b = True
     # start = verts[3] goal = verts[10]
-    print(Astar(verts, verts[10], verts[3]))
+
+    print(thetaStar(verts[10], verts[3],verts))
+    for i in range(5):
+        print(verts[i].p,end=" | ")
+    print()
+    for i in range(5,10):
+        print(verts[i].p,end=" | ")
+    print()
+    for i in range(10,15):
+        print(verts[i].p, end=" | ")
+    print()
