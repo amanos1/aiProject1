@@ -119,6 +119,9 @@ def displayPath(shortestPath, gs):
         vh = "h = {}"
         vf = "f = {}"
 
+        if ix > columns or iy > rows or ix < 1 or iy < 1:
+            return
+
         # display the information
         infoLabel = Label(window, text=vid.format(ix, iy))
         ourVertex = verticies[(columns+1) * (iy-1) + (ix-1)]

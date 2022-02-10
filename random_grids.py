@@ -10,7 +10,7 @@ def checkPath(fileName):
     global columns
     global rows
 
-    # opens the file and puts it's information on a string
+    # opens the file and puts its information on a string
     f = open(fileName, "r")
     file = f.read()
     fNums = file.split()
