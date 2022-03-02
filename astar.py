@@ -127,9 +127,9 @@ def UpdateVertex(s, sstar):
         sstar.setG(s.g + C(s, sstar))
         sstar.setP(s)
         if sstar in fringe:
-            fringe.remove(sstar)
             heapq.heapify(fringe)
-        heapq.heappush(fringe, sstar)
+        else:
+            heapq.heappush(fringe, sstar)
 
 
 def search(verts, goal, start, col, row):

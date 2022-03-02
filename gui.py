@@ -42,8 +42,12 @@ def initPath(fileName, a):
     # to access a point: verticies[(columns+1) * (y-1) + (x-1)]
     for j in range(rows + 1):
         for i in range(columns+1):
-            singleVertetx = astar.point(i+1, j+1, False, float('inf'), astar.H(goal, (i+1, j+1)), None)
-            verticies.append(singleVertetx)
+            if a:
+                singleVertetx = astar.point(i+1, j+1, False, float('inf'), astar.H(goal, (i+1, j+1)), None)
+                verticies.append(singleVertetx)
+            else:
+                singleVertetx = thetastar.point(i+1, j+1, False, float('inf'), thetastar.H(goal, (i+1, j+1)), None)
+                verticies.append(singleVertetx)
 
     # determines weather each cell is blocked, based on the file
     for i in range(columns):

@@ -35,9 +35,25 @@ class point:
     def __str__(self):
         return "c: " + str(self.x) + " " + str(self.y) + " " + str(self.b)
 
+    def equals(self, p):
+        return self.x == p.x and self.y == p.y
 
 fringe = []
 closed = set()
+
+
+# calculates the straight-line distance between two points
+def H(g, p):
+    xdiff = math.fabs(p[0] - g[0])
+    ydiff = math.fabs(p[1] - g[1])
+    return math.sqrt(math.pow(xdiff, 2) + math.pow(ydiff, 2))
+
+
+# calculates the straight-line distance between two points
+def C(s1, s2):
+    xdiff = math.fabs(s1.x - s2.x)
+    ydiff = math.fabs(s1.y - s2.y)
+    return math.sqrt(math.pow(xdiff, 2) + math.pow(ydiff, 2))
 
 
 # returns whether or not a given cell is blocked
@@ -108,21 +124,21 @@ def thetaStar(goal, start, verts):
 
 def UpdateVertex(s, sstar, verts):
     if LineOfSight(s.p, sstar, verts):
-        if (s.p.g+math.dist([s.p.x, s.p.y], [sstar.x, sstar.y])) < sstar.g:
-            sstar.g = s.p.g + math.dist([s.p.x, s.p.y], [sstar.x, sstar.y])
+        if (s.p.g+C(s.p, sstar)) < sstar.g:
+            sstar.g = s.p.g + C(s.p, sstar)
             sstar.p = s.p
             if sstar in fringe:
-                fringe.remove(sstar)
-            heapq.heapify(fringe)
-            heapq.heappush(fringe, sstar)
+                heapq.heapify(fringe)
+            else:
+                heapq.heappush(fringe, sstar)
     else:
-        if s.g + math.dist([s.x, s.y], [sstar.x, sstar.y]) < sstar.g:
-            sstar.g = s.g + math.dist([s.x, s.y], [sstar.x, sstar.y])
+        if s.g + C(s, sstar) < sstar.g:
+            sstar.g = s.g + C(s, sstar)
             sstar.p = s
             if sstar in fringe:
-                fringe.remove(sstar)
-            heapq.heappush(fringe, sstar)
-            heapq.heapify(fringe)
+                heapq.heapify(fringe)
+            else:
+                heapq.heappush(fringe, sstar)
 
 
 def grid(x, y, verts):
